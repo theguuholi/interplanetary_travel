@@ -2,7 +2,7 @@ defmodule InterplanetaryTravel.LaunchPlan.FuelCalculatorTest do
   use InterplanetaryTravel.DataCase
 
   import InterplanetaryTravel.LaunchPlan.FuelCalculator,
-    only: [launch: 2, landing: 2, total_landing_fuel: 2, total_launch_fuel: 2]
+    only: [launch: 2, landing: 2, calculate: 3]
 
   doctest InterplanetaryTravel.LaunchPlan.FuelCalculator
 
@@ -18,15 +18,14 @@ defmodule InterplanetaryTravel.LaunchPlan.FuelCalculatorTest do
     end
   end
 
-  describe "total_landing_fuel/2" do
-    test "given a mass and gravity, when calculate total landing fuel, then recursively account for fuel weight" do
-      assert total_landing_fuel(28_801, 9.807) == 13_447
+  describe "calculate/3" do
+    test "given an action, mass and gravity, when calculate fuel, then return the total fuel required for the action" do
+      assert calculate(:launch, 28_801, 9.807) == 19_772
+      assert calculate(:land, 28_801, 9.807) == 13_447
     end
-  end
 
-  describe "total_launch_fuel/2" do
-    test "given a mass and gravity, when calculate total launch fuel, then recursively account for fuel weight" do
-      assert total_launch_fuel(28_801, 9.807) == 19_772
+    test "given an unsupported action, mass and gravity, when calculate fuel, then return 0" do
+      assert calculate(:fly, 28_801, 9.807) == 0
     end
   end
 end

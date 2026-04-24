@@ -1,28 +1,50 @@
 defmodule InterplanetaryTravel.LaunchPlanTest do
   use InterplanetaryTravel.DataCase
 
-  import InterplanetaryTravel.LaunchPlan,
-    only: [launch: 2, landing: 2]
+  alias InterplanetaryTravel.LaunchPlan
+  alias InterplanetaryTravel.LaunchPlan.Plan
 
-  doctest InterplanetaryTravel.LaunchPlan
+  doctest LaunchPlan
 
-  describe "launch/2" do
-    test "given mass and planet, when planet is not available, then return error" do
-      assert {:error, :planet_is_not_available} = launch(28_801, :pluto)
-    end
-
-    test "given mass and planet, when planet is available, then return fuel required for launch" do
-      assert {:ok, 19_772} = launch(28_801, :earth)
+  describe "change_plan/2" do
+    test "returns a changeset" do
+      changeset = LaunchPlan.change_plan(%Plan{}, %{mass: 100})
+      assert %Ecto.Changeset{} = changeset
     end
   end
 
-  describe "landing/2" do
-    test "given mass and planet, when planet is not available, then return error" do
-      assert {:error, :planet_is_not_available} = landing(28_801, :pluto)
+  describe "validate/2" do
+    test "returns changeset and applied result when valid" do
+      attrs = %{
+        mass: 28_801,
+        paths: [
+          %{action: :launch, planet: :earth},
+          %{action: :land, planet: :moon},
+          %{action: :launch, planet: :moon},
+          %{action: :land, planet: :earth}
+        ]
+      }
+
+      {changeset, result} = LaunchPlan.validate(%Plan{}, attrs)
+
+      assert changeset.valid?
+      assert result.total_fuel_required == 51_898
     end
 
-    test "given mass and planet, when planet is available, then return fuel required for landing" do
-      assert {:ok, 13_447} = landing(28_801, :earth)
+    test "returns invalid changeset but still applies partial result" do
+      attrs = %{mass: -1, paths: []}
+
+      {changeset, result} = LaunchPlan.validate(%Plan{}, attrs)
+
+      refute changeset.valid?
+      assert result.mass == -1
+    end
+
+    test "handles empty attrs" do
+      {changeset, result} = LaunchPlan.validate(%Plan{}, %{})
+
+      refute changeset.valid?
+      assert result.total_fuel_required == 0
     end
   end
 end
