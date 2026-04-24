@@ -10,7 +10,8 @@ defmodule InterplanetaryTravel.Application do
     children = [
       InterplanetaryTravelWeb.Telemetry,
       InterplanetaryTravel.Repo,
-      {DNSCluster, query: Application.get_env(:interplanetary_travel, :dns_cluster_query) || :ignore},
+      {DNSCluster,
+       query: Application.get_env(:interplanetary_travel, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: InterplanetaryTravel.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: InterplanetaryTravel.Finch},
