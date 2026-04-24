@@ -17,7 +17,7 @@ defmodule InterplanetaryTravelWeb.Router do
   scope "/", InterplanetaryTravelWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", FlightPlanLive.Index, :index
   end
 
   # Other scopes may use custom stacks.
