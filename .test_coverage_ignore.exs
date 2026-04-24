@@ -6,5 +6,6 @@
   InterplanetaryTravel.Repo,
   InterplanetaryTravelWeb.Telemetry,
   InterplanetaryTravelWeb.ErrorHTML,
-  InterplanetaryTravelWeb.PageHTML
+  InterplanetaryTravelWeb.PageHTML,
+  InterplanetaryTravel.DataCase
 ]
