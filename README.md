@@ -1,5 +1,7 @@
 # Interplanetary Travel — Fuel Calculator
 
+[![CI](https://github.com/theguuholi/interplanetary_travel/actions/workflows/ci.yml/badge.svg)](https://github.com/theguuholi/interplanetary_travel/actions/workflows/ci.yml)
+
 A real-time fuel calculator for interplanetary missions, built with **Phoenix LiveView**.
 
 <img width="1446" height="810" alt="Screenshot 2026-04-27 at 08 56 21" src="https://github.com/user-attachments/assets/6d421d01-40ea-4340-8072-b0cc659d6caa" />
