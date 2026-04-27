@@ -38,5 +38,16 @@ defmodule InterplanetaryTravel.LaunchPlan.PathTest do
       changeset = changeset(%Path{}, attrs)
       assert errors_on(changeset) == %{planet: ["can't be blank"]}
     end
+
+    test "generates an id when path has none" do
+      %{changes: changes} = changeset(%Path{}, %{action: :launch, planet: :earth})
+      assert changes.id != nil
+    end
+
+    test "preserves existing id when path already has one" do
+      existing_id = Ecto.UUID.generate()
+      changeset = changeset(%Path{id: existing_id}, %{action: :launch, planet: :earth})
+      assert Ecto.Changeset.get_field(changeset, :id) == existing_id
+    end
   end
 end
