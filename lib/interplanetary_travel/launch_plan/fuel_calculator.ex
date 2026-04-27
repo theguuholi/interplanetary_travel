@@ -4,6 +4,30 @@ defmodule InterplanetaryTravel.LaunchPlan.FuelCalculator do
   """
 
   @doc """
+  Calculates the total fuel required for a given operation (launch or landing),
+  accounting for the weight of the fuel itself. Recursively adds fuel for each
+  fuel load until no additional fuel is needed.
+
+  Accepts either `:launch` or `:land` as the operation type. Returns 0 for any
+  other operation type.
+
+  ## Examples
+
+      iex> InterplanetaryTravel.LaunchPlan.FuelCalculator.calculate(:launch, 28_801, 9.807)
+      19772
+
+      iex> InterplanetaryTravel.LaunchPlan.FuelCalculator.calculate(:land, 28_801, 9.807)
+      13447
+
+      iex> InterplanetaryTravel.LaunchPlan.FuelCalculator.calculate(:unknown, 28_801, 9.807)
+      0
+  """
+  @spec calculate(atom(), integer(), float()) :: integer()
+  def calculate(:launch, mass, gravity), do: accumulate_fuel(&launch/2, mass, gravity, 0)
+  def calculate(:land, mass, gravity), do: accumulate_fuel(&landing/2, mass, gravity, 0)
+  def calculate(_, _, _), do: 0
+
+  @doc """
   Calculates the fuel required for a launch given a mass and gravitational acceleration.
 
   ## Examples
@@ -25,45 +49,17 @@ defmodule InterplanetaryTravel.LaunchPlan.FuelCalculator do
   @spec landing(integer(), float()) :: integer()
   def landing(mass, gravity), do: calculate_fuel(mass, gravity, 0.033, 42)
 
-  @doc """
-  Calculates the total fuel required for a landing, accounting for the weight
-  of the fuel itself. Recursively adds fuel for each fuel load until no
-  additional fuel is needed.
-
-  ## Examples
-
-      iex> InterplanetaryTravel.LaunchPlan.FuelCalculator.total_landing_fuel(28_801, 9.807)
-      13447
-  """
-  @spec total_landing_fuel(integer(), float()) :: integer()
-  def total_landing_fuel(mass, gravity), do: accumulate_fuel(&landing/2, mass, gravity, 0)
-
-  @doc """
-  Calculates the total fuel required for a launch, accounting for the weight
-  of the fuel itself. Recursively adds fuel for each fuel load until no
-  additional fuel is needed.
-
-  ## Examples
-
-      iex> InterplanetaryTravel.LaunchPlan.FuelCalculator.total_launch_fuel(28_801, 9.807)
-      19772
-  """
-  @spec total_launch_fuel(integer(), float()) :: integer()
-  def total_launch_fuel(mass, gravity), do: accumulate_fuel(&launch/2, mass, gravity, 0)
-
   defp accumulate_fuel(fuel_fn, mass, gravity, acc) do
-    case fuel_fn.(mass, gravity) do
-      fuel when fuel <= 0 -> acc
-      fuel -> accumulate_fuel(fuel_fn, fuel, gravity, acc + fuel)
+    fuel = fuel_fn.(mass, gravity)
+
+    if fuel <= 0 do
+      acc
+    else
+      accumulate_fuel(fuel_fn, fuel, gravity, acc + fuel)
     end
   end
 
   defp calculate_fuel(mass, gravity, factor, offset) do
-    mass
-    |> Kernel.*(gravity)
-    |> Kernel.*(factor)
-    |> Kernel.-(offset)
-    |> Float.floor()
-    |> trunc()
+    floor(mass * gravity * factor - offset)
   end
 end

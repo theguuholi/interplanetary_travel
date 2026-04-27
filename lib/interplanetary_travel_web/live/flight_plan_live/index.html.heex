@@ -1,1 +1,138 @@
-hi
+<main class="min-h-screen p-8">
+  <h1 class="text-3xl font-bold mb-8 text-center">Interplanetary Travel Fuel Calculator</h1>
+
+  <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="max-w-6xl  mt-10 bg-white shadow-md rounded-2xl p-6 border border-gray-100">
+      <h2 class="text-lg font-semibold text-gray-800">
+        Configure Launch Plan
+      </h2>
+
+      <.simple_form
+        for={@form}
+        id="launch_plan-form"
+        phx-change="validate"
+        class="space-y-6"
+      >
+        <!-- Mass -->
+        <div class="bg-gray-50 rounded-xl p-4">
+          <.input
+            field={@form[:mass]}
+            type="number"
+            label="Spacecraft Mass (kg)"
+            class="mt-2"
+            step="1"
+            inputmode="numeric"
+            pattern="[0-9]*"
+          />
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-medium text-gray-700">
+              Flight Path
+            </h3>
+
+            <button
+              type="button"
+              name="plan[paths_sort][]"
+              value="new"
+              phx-click={JS.dispatch("change")}
+              class="text-xs font-medium text-indigo-600 hover:text-indigo-500"
+            >
+              + Add step
+            </button>
+          </div>
+
+          <div class="space-y-3">
+            <.inputs_for :let={ef} field={@form[:paths]}>
+              <div class="grid grid-cols-12 gap-3 items-center bg-gray-50 px-4 py-3 rounded-xl border border-gray-100">
+                <input type="hidden" name="plan[paths_sort][]" value={ef.data.id || ef.index} />
+
+                <div class="col-span-1 text-xs text-gray-400">
+                  {ef.index + 1}
+                </div>
+
+                <div class="col-span-4">
+                  <.input
+                    type="select"
+                    field={ef[:action]}
+                    options={[{"Launch", "launch"}, {"Land", "land"}]}
+                  />
+                </div>
+
+                <div class="col-span-5">
+                  <.input
+                    type="select"
+                    field={ef[:planet]}
+                    options={[
+                      {"Earth", "earth"},
+                      {"Moon", "moon"},
+                      {"Mars", "mars"}
+                    ]}
+                  />
+                </div>
+
+                <div class="col-span-2 flex justify-end">
+                  <button
+                    type="button"
+                    name="plan[paths_drop][]"
+                    value={ef.data.id || ef.index}
+                    phx-click={JS.dispatch("change")}
+                    class="text-gray-400 hover:text-red-500 transition"
+                  >
+                    <.icon name="hero-x-mark" class="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </.inputs_for>
+          </div>
+
+          <input type="hidden" name="plan[paths_drop][]" />
+        </div>
+      </.simple_form>
+    </div>
+
+    <div class="max-w-2xl mt-10 bg-white shadow-md rounded-2xl p-6 border border-gray-100">
+      <h1 class="text-xl font-semibold text-gray-800">
+        Mission summary and fuel calculation
+      </h1>
+
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="bg-gray-50 rounded-xl p-4">
+          <p class="text-xs text-gray-500">Equipment Mass</p>
+          <p id="equipment-mass" class="text-lg font-semibold text-gray-800">
+            {@plan.mass} kg
+          </p>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-4">
+          <p class="text-xs text-gray-500">Total Fuel Required</p>
+          <p id="total-fuel-required" class="text-lg font-semibold text-indigo-600">
+            {@plan.total_fuel_required} kg
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-sm font-medium text-gray-700 mb-3">Flight Path</h2>
+
+        <ul class="space-y-2">
+          <%= for {path, index} <- Enum.with_index(@plan.paths, 1) do %>
+            <li
+              id={"step-#{index}"}
+              class="flex items-center justify-between bg-gray-50 px-4 py-2 rounded-lg"
+            >
+              <div class="text-sm text-gray-600">
+                Step {index}
+              </div>
+
+              <span class="text-sm font-medium text-gray-800">
+                {path.action} {path.planet}
+              </span>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>

@@ -1,54 +1,76 @@
 defmodule InterplanetaryTravel.LaunchPlan do
   @moduledoc """
-  Provides functions to calculate the fuel requirements for interplanetary travel based on mass and planet.
+  High-level API for building and validating interplanetary launch plans.
+
+  This module acts as a boundary around `Plan`, providing:
+
+  - Changeset generation (`change_plan/2`)
+  - Validation + computed result (`validate/2`)
+
+  It is designed to be used by interfaces such as LiveView forms.
   """
 
-  alias __MODULE__.FuelCalculator
+  import Ecto.Changeset, only: [apply_changes: 1]
 
-  @available_planets %{
-    earth: 9.807,
-    moon: 1.62,
-    mars: 3.71
-  }
+  alias InterplanetaryTravel.LaunchPlan.Plan
+
+  @type attrs :: map()
+  @type changeset :: Ecto.Changeset.t()
+  @type result :: Plan.t()
 
   @doc """
-  Calculates the fuel required for a launch given a mass and planet. Returns an error if the planet is not available.
+  Builds a changeset for a launch plan.
 
-  ## Examples
+  This function does not apply changes; it only prepares validation and casting.
 
-      iex> InterplanetaryTravel.LaunchPlan.launch(28_801, :earth)
-      {:ok, 19772}
+  ## Example
 
-      iex> InterplanetaryTravel.LaunchPlan.launch(28_801, :pluto)
-      {:error, :planet_is_not_available}
+      iex> alias InterplanetaryTravel.LaunchPlan
+      iex> alias InterplanetaryTravel.LaunchPlan.Plan
+
+      iex> cs = LaunchPlan.change_plan(%Plan{}, %{mass: 100})
+      iex> is_map(cs.changes)
+      true
   """
-  @spec launch(integer(), atom()) :: {:ok, integer()} | {:error, :planet_is_not_available}
-  def launch(mass, planet) do
-    gravity = Map.get(@available_planets, planet)
-
-    case gravity do
-      nil -> {:error, :planet_is_not_available}
-      gravity -> {:ok, FuelCalculator.total_launch_fuel(mass, gravity)}
-    end
+  @spec change_plan(Plan.t(), attrs()) :: changeset()
+  def change_plan(plan, attrs \\ %{}) do
+    Plan.changeset(plan, attrs)
   end
 
   @doc """
-  Calculates the fuel required for a landing given a mass and planet. Returns an error if the planet is not available.
+  Validates a launch plan and returns both the changeset and the computed result.
+
+  This is useful for LiveView forms where you want:
+
+  - validation errors
+  - computed values (like `total_fuel_required`) at the same time
+
+  ## Returns
+
+    `{changeset, result}`
+
+  - `changeset` — includes validation errors
+  - `result` — struct with applied changes (even if invalid)
 
   ## Examples
 
-      iex> InterplanetaryTravel.LaunchPlan.landing(28_801, :earth)
-      {:ok, 13447}
+      iex> alias InterplanetaryTravel.LaunchPlan
+      iex> alias InterplanetaryTravel.LaunchPlan.Plan
 
-      iex> InterplanetaryTravel.LaunchPlan.landing(28_801, :pluto)
-      {:error, :planet_is_not_available}
+      iex> attrs = %{mass: 100, paths: [%{action: :launch, planet: :earth}]}
+      iex> {cs, plan} = LaunchPlan.validate(%Plan{}, attrs)
+      iex> cs.valid?
+      true
+      iex> is_integer(plan.total_fuel_required)
+      true
+
+      iex> {_cs, plan} = LaunchPlan.validate(%Plan{}, %{mass: -1})
+      iex> plan.mass == -1
+      true
   """
-  def landing(mass, planet) do
-    gravity = Map.get(@available_planets, planet)
-
-    case gravity do
-      nil -> {:error, :planet_is_not_available}
-      gravity -> {:ok, FuelCalculator.total_landing_fuel(mass, gravity)}
-    end
+  @spec validate(Plan.t(), attrs()) :: {changeset(), result()}
+  def validate(plan, attrs) do
+    changeset = change_plan(plan, attrs)
+    {changeset, apply_changes(changeset)}
   end
 end
