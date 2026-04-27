@@ -5,9 +5,9 @@ defmodule InterplanetaryTravel.LaunchPlan.Path do
 
   use Ecto.Schema
   import Ecto.Changeset
-  @planets ~w[earth moon mars]a
-  @actions ~w[launch land]a
-  @fields ~w[action planet]a
+  @planets ~w/earth moon mars/a
+  @actions ~w/launch land/a
+  @fields ~w/action planet/a
 
   @type action :: :launch | :land | nil
   @type planet :: :earth | :moon | :mars | nil
