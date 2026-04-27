@@ -23,4 +23,7 @@ defmodule InterplanetaryTravelWeb.FlightPlanLive.Index do
       plan: plan
     )
   end
+
+  defp action_options, do: [{"Launch", "launch"}, {"Land", "land"}]
+  defp planet_options, do: [{"Earth", "earth"}, {"Moon", "moon"}, {"Mars", "mars"}]
 end
