@@ -29,5 +29,13 @@ defmodule InterplanetaryTravel.LaunchPlan.Path do
     path
     |> cast(attrs, @fields)
     |> validate_required(@fields)
+    |> put_new_id()
+  end
+
+  defp put_new_id(changeset) do
+    case get_field(changeset, :id) do
+      nil -> put_change(changeset, :id, Ecto.UUID.generate())
+      _ -> changeset
+    end
   end
 end
