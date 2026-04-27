@@ -5,7 +5,7 @@ defmodule InterplanetaryTravelWeb.FlightPlanLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    plan = %Plan{}
+    plan = %Plan{mass: 0}
     form = to_form(LaunchPlan.change_plan(plan))
     {:ok, assign_plan(socket, form, plan)}
   end

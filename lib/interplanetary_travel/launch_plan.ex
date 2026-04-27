@@ -34,7 +34,9 @@ defmodule InterplanetaryTravel.LaunchPlan do
   """
   @spec change_plan(Plan.t(), attrs()) :: changeset()
   def change_plan(plan, attrs \\ %{}) do
-    Plan.changeset(plan, attrs)
+    plan
+    |> Plan.changeset(attrs)
+    |> Map.put(:action, :validate)
   end
 
   @doc """
